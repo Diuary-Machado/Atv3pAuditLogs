@@ -29,6 +29,8 @@ public class Paciente {
 
 	private String cpf;
 
+	private String email;
+	
 	private String telefone;
 
 	@OneToOne(cascade = CascadeType.ALL)
