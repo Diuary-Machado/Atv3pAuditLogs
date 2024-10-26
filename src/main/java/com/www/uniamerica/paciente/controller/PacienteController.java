@@ -3,7 +3,9 @@ package com.www.uniamerica.paciente.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,48 +18,61 @@ import org.springframework.web.bind.annotation.RestController;
 import com.www.uniamerica.paciente.entity.Paciente;
 import com.www.uniamerica.paciente.service.PacienteService;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @RestController
 @RequestMapping("/pacientes")
 public class PacienteController {
 
+    @Autowired
+    private PacienteService pacienteService;
 
-	@Autowired
-	private PacienteService pacienteService;
+    @GetMapping("/findall")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Object> findAll() {
+        List<Paciente> pacientes = pacienteService.findAll();
+        if (pacientes.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Não há pacientes disponíveis.");
+        }
+        return ResponseEntity.ok(pacientes);
+    }
 
-	@GetMapping("/findall") 
-	public List<Paciente> findAll(){
-		return pacienteService.findAll();
+    @GetMapping("/findby/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Object> findById(@PathVariable Long id) {
+        Paciente paciente = pacienteService.findById(id);
+        if (paciente != null) {
+            return ResponseEntity.ok(paciente);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Paciente não encontrado com o ID: " + id);
+    }
 
-	}
+    @PostMapping("/save")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> save(@RequestBody Paciente paciente) {
+        pacienteService.save(paciente);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Paciente criado com sucesso!");
+    }
 
-	@GetMapping("/findby/{id}")
-	public ResponseEntity<Paciente> findById(@PathVariable Long id) {
-		Paciente paciente = pacienteService.findById(id);
-		if (paciente != null) {
-			return ResponseEntity.ok(paciente);
-		}
-		return ResponseEntity.notFound().build();
-	}
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        try {
+            pacienteService.delete(id);
+            return ResponseEntity.ok("Paciente deletado com sucesso!");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Paciente não encontrado.");
+        }
+    }
 
-	@PostMapping("/save")
-	public Paciente save(@RequestBody Paciente paciente) {
-		return pacienteService.save(paciente);
-	}
-
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		pacienteService.delete(id);
-		return ResponseEntity.noContent().build();
-	}
-
-	@PutMapping("/update/{id}")
-	public ResponseEntity<Paciente> update(@PathVariable Long id, @RequestBody Paciente paciente) {
-		Paciente updatedPaciente = pacienteService.update(id, paciente);
-		return ResponseEntity.ok(updatedPaciente);
-	}
-
-
-
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> update(@PathVariable Long id, @RequestBody Paciente paciente) {
+        try {
+            pacienteService.update(id, paciente);
+            return ResponseEntity.ok("Paciente atualizado com sucesso!");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Paciente não encontrado.");
+        }
+    }
 }
-
-

@@ -11,29 +11,31 @@ import com.www.uniamerica.paciente.repository.ConsultaRepository;
 @Service
 public class ConsultaService {
 
+    @Autowired
+    private ConsultaRepository consultaRepository;
 
-	@Autowired
-	private ConsultaRepository consultaRepository;
+    public List<Consulta> findAll() {
+        return consultaRepository.findAll();
+    }
 
-	public List<Consulta> findAll() {
-		return consultaRepository.findAll();
-	}
+    public Consulta findById(Long id) {
+        return consultaRepository.findById(id).orElse(null);
+    }
 
-	public Consulta findById(Long id) {
-		return consultaRepository.findById(id).orElse(null);
-	}
+    public Consulta save(Consulta consulta) {
+        return consultaRepository.save(consulta);
+    }
 
-	public Consulta save(Consulta consulta) {
-		return consultaRepository.save(consulta);
-	}
+    public void delete(Long id) {
+        consultaRepository.deleteById(id);
+    }
 
-	public void delete(Long id) {
-		consultaRepository.deleteById(id);
-	}
+    public Consulta update(Long id, Consulta consulta) {
+        consulta.setId(id);
+        return consultaRepository.save(consulta);
+    }
 
-	public Consulta update(Long id, Consulta consulta) {
-		consulta.setId(id);
-		return consultaRepository.save(consulta);
-	}
-
+    public List<Consulta> findConsultasByPacienteId(Long pacienteId) {
+        return consultaRepository.findByPacienteId(pacienteId);
+    }
 }
