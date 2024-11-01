@@ -1,0 +1,10 @@
+
+CREATE TABLE audit (
+		
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    action_type VARCHAR(10) NOT NULL,
+    entity_id BIGINT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    
+);
